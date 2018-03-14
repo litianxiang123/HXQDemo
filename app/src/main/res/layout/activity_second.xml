@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/traceroute_rootview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:clickable="true"
+    tools:context="helloworld.example.com.hxqdemo.SecondActivity">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_margin="10dp"
+            android:background="@mipmap/common_icon_close2x"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="25dp"
+        android:layout_gravity="center_horizontal">
+        <ImageView
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:background="@mipmap/login_logo2x"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginLeft="15dp"
+                android:layout_gravity="center_vertical"
+                android:background="@mipmap/login_icon_sjh2x"/>
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/et_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="请输入手机号"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="80dp"
+                    android:layout_height="30dp"
+                    android:textColor="#fff"
+                    android:id="@+id/verify"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:background="@drawable/verify"
+                    android:layout_alignRight="@id/et_phone"
+                    android:text="验证"/>
+            </RelativeLayout>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginLeft="15dp"
+                android:layout_gravity="center_vertical"
+                android:background="@mipmap/login_icon_yzm2x"/>
+            <EditText
+                android:id="@+id/et_verify"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="请输入验证码"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_marginLeft="35dp"
+                android:layout_gravity="center_vertical"
+                android:background="@mipmap/login_icon_ty2x"/>
+            <TextView
+                android:id="@+id/et_chioce"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="您已同意《花小钱用户协议》"
+                android:layout_margin="10dp"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <Button
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/users"
+            android:textColor="#ffffff"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20sp"
+            android:layout_margin="10dp"
+            android:text="快速登录"/>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:background="@color/colorAccent">
+
+        <ListView
+            android:id="@+id/lv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </ListView>
+
+    </LinearLayout>
+
+
+</LinearLayout>
