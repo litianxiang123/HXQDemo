@@ -10,18 +10,20 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import helloworld.example.com.hxqdemo.bean.CateGoryBean;
+
 /**
  * Created by 李天祥 on 2018/3/13.
  */
 
 public class Adapter extends BaseAdapter{
     private Context context;
-    private List<String> list;
+    private List<CateGoryBean.ResultBean> list;
     private LayoutInflater inflater;
     private  int selectedPosition = 0;
 
 
-    public Adapter(Context context, List<String> list) {
+    public Adapter(Context context, List<CateGoryBean.ResultBean> list) {
         this.context = context;
         this.list = list;
         inflater = LayoutInflater.from(context);
@@ -69,8 +71,8 @@ public class Adapter extends BaseAdapter{
             //这里设置未被选中的item的颜色
             //convertView.setBackgroundResource(R.color.color_fffff);
         }
-        String s= list.get(position);
-        holder.tv.setText("花小钱");
+        CateGoryBean.ResultBean resultBean = list.get(position);
+        holder.tv.setText(resultBean.getName());
         return convertView;
     }
 

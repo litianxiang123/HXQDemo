@@ -30,7 +30,7 @@ public class RetrofitHelper {
 
     public static  <T> T crtateApi(Class<T> tClass,String url){
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("")
+                .baseUrl(url)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(okHttpClient)

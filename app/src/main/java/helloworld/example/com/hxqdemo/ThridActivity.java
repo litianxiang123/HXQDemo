@@ -1,69 +1,51 @@
 package helloworld.example.com.hxqdemo;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
-import android.util.ArraySet;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.zhy.view.flowlayout.FlowLayout;
-import com.zhy.view.flowlayout.TagAdapter;
-import com.zhy.view.flowlayout.TagFlowLayout;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-public class ThridActivity extends AppCompatActivity {
+import helloworld.example.com.hxqdemo.utils.LFlowLayout;
 
+public class ThridActivity extends AppCompatActivity implements View.OnClickListener{
 
-    private EditText et_search;
-    private TextView tv_tip;
-    private ImageView tv_clear;
-    private TextView sousuo;
-
-    private TagFlowLayout mFlowLayout;
-    private List<String> strings;
-    //布局管理器
+    private LFlowLayout mFlowLayout;
     private LayoutInflater mInflater;
-    //流式布局的子布局
-    private TextView textview;
+    private String[] mVals = new String[]{"Java", "Android", "iOS", "Python",
+            "Mac OS", "PHP", "JavaScript", "Objective-C",
+            "Groovy", "Pascal", "Ruby", "Go", "Swift"};//数据模拟，实际应从网络获取此数据
 
-    String history = "";
-    int a = 0;
-
-    List<String> historylist = new ArrayList<>();
-
-    public Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 1:
-                    mFlowLayout.setAdapter(new TagAdapter<String>(strings) {
-                        @Override
-                        public View getView(FlowLayout parent, int position, String s) {
-                            textview = (TextView) mInflater.inflate(R.layout.textview,
-                                    mFlowLayout, false);
-                            textview.setText(s);
-                            return textview;
-                        }
-                    });
-                    break;
-            }
-            super.handleMessage(msg);
-        }
-    };
+    /************
+     * 以上为流式标签相关
+     ************/
+    public static final String EXTRA_KEY_TYPE = "extra_key_type";
+    public static final String EXTRA_KEY_KEYWORD = "extra_key_keyword";
+    public static final String KEY_SEARCH_HISTORY_KEYWORD = "key_search_history_keyword";
+    private SharedPreferences mPref;//使用SharedPreferences记录搜索历史
+    private String mType;
+    private EditText input;
+    private Button btn_search;
+    private List<String> mHistoryKeywords;//记录文本
+    private ArrayAdapter<String> mArrAdapter;//搜索历史适配器
+    private LinearLayout mSearchHistoryLl;
 
 
     @Override
@@ -72,90 +54,169 @@ public class ThridActivity extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_thrid);
 
-        // 初始化控件
-        initView();
+        initFlowView();
 
-
+        initHistoryView();
     }
 
-    private void initView() {
-        et_search = (EditText) findViewById(R.id.et_search);
-        tv_tip = (TextView) findViewById(R.id.tv_tip);
-        tv_clear = (ImageView) findViewById(R.id.tv_clear);
-        sousuo = (TextView) findViewById(R.id.sousuo);
+    private void initFlowView() {
         mInflater = LayoutInflater.from(this);
-        mFlowLayout = (TagFlowLayout) findViewById(R.id.id_flowlayout);
+        mFlowLayout = (LFlowLayout) findViewById(R.id.flowlayout);
+        initData();
+    }
 
-        strings = new ArrayList<>();
-
-        final SharedPreferences preferences = getSharedPreferences("config",0);
-        final  SharedPreferences.Editor editor = preferences.edit();
-
-        String string = preferences.getString("string", "");
-
-        String[] split = string.split("");
-        if (split.length > 0&&!string.equals("")){
-            for (int i = 0; i < split.length; i++) {
-                strings.add(split[i]);
-            }
-            handler.sendEmptyMessageDelayed(1,0);
+    /**
+     * 将数据放入流式布局
+     */
+    private void initData() {
+        for (int i = 0; i < mVals.length; i++) {
+            TextView tv = (TextView) mInflater.inflate(
+                    R.layout.search_label_tv, mFlowLayout, false);
+            tv.setText(mVals[i]);
+            final String str = tv.getText().toString();
+            //点击事件
+            tv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //加入搜索历史纪录记录
+                    Toast.makeText(ThridActivity.this, str, Toast.LENGTH_LONG).show();
+                }
+            });
+            mFlowLayout.addView(tv);
         }
+    }
 
-        // 调整EditText左边的搜索按钮的大小
-        Drawable drawable = getResources().getDrawable(R.drawable.search);
-        drawable.setBounds(0, 0, 60, 60);// 第一0是距左边距离，第二0是距上边距离，60分别是长宽
-        et_search.setCompoundDrawables(drawable, null, null, null);// 只放左边
+    /************
+     * 以上为流式标签相关
+     ************/
 
-        sousuo.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.M)
+    private void initHistoryView() {
+        input = (EditText) findViewById(R.id.et_input);
+        btn_search = (Button) findViewById(R.id.btn_search);
+        btn_search.setOnClickListener((View.OnClickListener) this);
+
+        mPref = getSharedPreferences("input", Activity.MODE_PRIVATE);
+        mType = getIntent().getStringExtra(EXTRA_KEY_TYPE);
+        String keyword = getIntent().getStringExtra(EXTRA_KEY_KEYWORD);
+        if (!TextUtils.isEmpty(keyword)) {
+            input.setText(keyword);
+        }
+        mHistoryKeywords = new ArrayList<String>();
+        input = (EditText) findViewById(R.id.et_input);
+
+        input.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View v) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                String string = preferences.getString("string", "");
+            }
 
-                historylist.clear();
-
-                if (!et_search.getText().toString().trim().equals("")) {
-                    String aa = et_search.getText().toString().trim();
-
-                    Set<String> set = new ArraySet<>();
-                    set.add(aa);
-                    historylist.add(aa);
-                    a++;
-                    history+= aa+"   ";
-                    for (int i=0;i<historylist.size();i++){
-                        editor.putString("string",history).commit();
-                        strings.add(historylist.get(i));
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() == 0) {
+                    if (mHistoryKeywords.size() > 0) {
+                        mSearchHistoryLl.setVisibility(View.VISIBLE);
+                    } else {
+                        mSearchHistoryLl.setVisibility(View.GONE);
                     }
-                    //通知handler更新UI
-                    handler.sendEmptyMessageDelayed(1, 0);
-                }else{
-                    Toast.makeText(ThridActivity.this, "请输入要搜索的内容", Toast.LENGTH_SHORT).show();
+                } else {
+                    mSearchHistoryLl.setVisibility(View.GONE);
                 }
             }
-        });
 
-        //TODO:清除历史信息
-        tv_clear.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                history = "";
-                historylist.clear();
-                strings.clear();
-                handler.sendEmptyMessageDelayed(1, 0);
+            public void afterTextChanged(Editable s) {
+
             }
         });
-
-        //流式布局tag的点击方法
-        mFlowLayout.setOnTagClickListener(new TagFlowLayout.OnTagClickListener() {
-            @Override
-            public boolean onTagClick(View view, int position, FlowLayout parent) {
-                Toast.makeText(ThridActivity.this, textview.getText(), Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
-
+        initSearchHistory();
     }
 
+    /**
+     * 初始化搜索历史记录
+     */
+    public void initSearchHistory() {
+        mSearchHistoryLl = (LinearLayout) findViewById(R.id.search_history_ll);
+        ListView listView = (ListView) findViewById(R.id.search_history_lv);
+        findViewById(R.id.clear_history_btn).setOnClickListener(this);
+        String history = mPref.getString(KEY_SEARCH_HISTORY_KEYWORD, "");
+        if (!TextUtils.isEmpty(history)) {
+            List<String> list = new ArrayList<String>();
+            for (Object o : history.split(",")) {
+                list.add((String) o);
+            }
+            mHistoryKeywords = list;
+        }
+        if (mHistoryKeywords.size() > 0) {
+            mSearchHistoryLl.setVisibility(View.VISIBLE);
+        } else {
+            mSearchHistoryLl.setVisibility(View.GONE);
+        }
+        mArrAdapter = new ArrayAdapter<String>(this, R.layout.item_search_history, mHistoryKeywords);
+        listView.setAdapter(mArrAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                input.setText(mHistoryKeywords.get(i));
+                mSearchHistoryLl.setVisibility(View.GONE);
+            }
+        });
+        mArrAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 储存搜索历史
+     */
+    public void save() {
+        String text = input.getText().toString();
+        String oldText = mPref.getString(KEY_SEARCH_HISTORY_KEYWORD, "");
+        Log.e("tag", "" + oldText);
+        Log.e("Tag", "" + text);
+        Log.e("Tag", "" + oldText.contains(text));
+        if (!TextUtils.isEmpty(text) && !(oldText.contains(text))) {
+            if (mHistoryKeywords.size() > 5) {
+                //最多保存条数
+                return;
+            }
+            SharedPreferences.Editor editor = mPref.edit();
+            editor.putString(KEY_SEARCH_HISTORY_KEYWORD, text + "," + oldText);
+            editor.commit();
+            mHistoryKeywords.add(0, text);
+        }
+        mArrAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 清除历史纪录
+     */
+    public void cleanHistory() {
+        mPref = getSharedPreferences("input", MODE_PRIVATE);
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.remove(KEY_SEARCH_HISTORY_KEYWORD).commit();
+        mHistoryKeywords.clear();
+        mArrAdapter.notifyDataSetChanged();
+        mSearchHistoryLl.setVisibility(View.GONE);
+        Toast.makeText(ThridActivity.this, "清楚搜索历史成功", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_search:
+                String keywords = input.getText().toString();
+                if (!TextUtils.isEmpty(keywords)) {
+                    Toast.makeText(ThridActivity.this, keywords + "save成功", Toast.LENGTH_LONG).show();
+                    save();
+                } else {
+                    Toast.makeText(ThridActivity.this, "请输入搜索内容", Toast.LENGTH_LONG).show();
+                }
+                break;
+            case R.id.clear_history_btn:
+                cleanHistory();
+                break;
+            default:
+                break;
+        }
+
+    }
 
 }

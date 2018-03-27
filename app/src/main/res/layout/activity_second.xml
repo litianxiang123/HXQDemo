@@ -127,13 +127,23 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="300dp">
+        android:layout_height="600dp"
+        android:orientation="vertical">
+
+        <ListView
+            android:id="@+id/mlv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorAccent">
+        </ListView>
 
         <ListView
             android:id="@+id/lv"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         </ListView>
+
+
 
     </LinearLayout>
 

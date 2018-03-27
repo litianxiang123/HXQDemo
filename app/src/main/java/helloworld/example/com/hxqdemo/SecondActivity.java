@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -15,18 +14,20 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import helloworld.example.com.hxqdemo.bean.CateGoryBean;
+import helloworld.example.com.hxqdemo.bean.CateGroySubBean;
+import helloworld.example.com.hxqdemo.presenter.CateGoryPresenter;
 
-public class SecondActivity extends AppCompatActivity {
+public class SecondActivity extends AppCompatActivity implements CateGoryView{
 
 
     @BindView(R.id.lv)
     ListView mLv;
+    @BindView(R.id.mlv)
+    ListView  getmLv;
     @BindView(R.id.et_phone)
     EditText et_phone;
     @BindView(R.id.traceroute_rootview)
@@ -42,13 +43,14 @@ public class SecondActivity extends AppCompatActivity {
     @BindView(R.id.btn_login)
     Button mBtnLogin;
 
-    private List<String> list;
     private Context activity;
 
 
     private View formerView=null;
 
     private  Adapter adapter;
+
+    private CateGoryPresenter cateGoryPresenter;
 
 
 
@@ -57,30 +59,13 @@ public class SecondActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
         ButterKnife.bind(this);
+        cateGoryPresenter = new CateGoryPresenter(this);
+        cateGoryPresenter.getCateGory();
+        cateGoryPresenter.getCateGroySub(2+"");
         initView();
     }
 
     public void initView() {
-
-        list = new ArrayList<>();
-
-        for (int i = 0; i < 100; i++) {
-            list.add("Item:" + i);
-        }
-
-         adapter = new Adapter(this, list);
-        mLv.setAdapter(adapter);
-
-        mLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // TODO Auto-generated method stub
-                //这句是通知adapter改变选中的position
-                adapter.clearSelection(position);
-                //关键是这一句，激情了，它可以让listview改动过的数据重新加载一遍，以达到你想要的效果
-                adapter.notifyDataSetChanged();
-            }
-        });
 
         showSoftInput(this, et_phone);
     }
@@ -141,5 +126,35 @@ public class SecondActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
         }
+    }
+
+    @Override
+    public void getCateGory(CateGoryBean cateGoryBean) {
+
+//       adapter = new Adapter(SecondActivity.this,cateGoryBean.getResult());
+//        mLv.setAdapter(adapter);
+//
+//        mLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                // TODO Auto-generated method stub
+//                //这句是通知adapter改变选中的position
+//                adapter.clearSelection(position);
+//                //关键是这一句，激情了，它可以让listview改动过的数据重新加载一遍，以达到你想要的效果
+//                adapter.notifyDataSetChanged();
+//
+////                CateGoryBean.ResultBean resultBean = (CateGoryBean.ResultBean) parent.getItemAtPosition(position);
+////                int categoryId = resultBean.getCategoryId();
+////                cateGoryPresenter.getCateGroySub(categoryId+"");
+//            }
+//        });
+
+    }
+
+    @Override
+    public void getCateGorySub(CateGroySubBean cateGroySubBean) {
+
+        CateAdapter adapter = new CateAdapter(this,cateGroySubBean.getResult());
+        getmLv.setAdapter(adapter);
     }
 }
